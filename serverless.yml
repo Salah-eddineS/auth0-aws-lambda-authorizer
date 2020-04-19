@@ -1,0 +1,40 @@
+service: ${env:SERVICE_NAME}
+
+plugins:
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${env:STAGE}
+  region: ${env:REGION}
+  environment:
+    AUTH0_AUDIENCE: ${env:AUTH0_AUDIENCE}
+    AUTH0_DOMAIN: ${env:AUTH0_DOMAIN}
+
+functions:
+  app:
+    handler: index.handler
+    cors: true
+
+Resources:
+  GatewayResponse:
+    Type: "AWS::ApiGateway::GatewayResponse"
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      ResponseType: EXPIRED_TOKEN
+      RestApiId:
+        Ref: "ApiGatewayRestApi"
+      StatusCode: "401"
+  AuthFailureGatewayResponse:
+    Type: "AWS::ApiGateway::GatewayResponse"
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      ResponseType: UNAUTHORIZED
+      RestApiId:
+        Ref: "ApiGatewayRestApi"
+      StatusCode: "401"
